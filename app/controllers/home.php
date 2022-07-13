@@ -1,72 +1,73 @@
-<html>
-<form method="post" action="">
-    <button name="button" value="getall">GetAll</button>
-    <hr>
-</form>
-<form method="post" action="">
-    <label>ID</label>
-    <input type="text" name="id">
-    <button name="button" value="getone">GetOne</button>
-    <hr>
-</form>   
-<form method="post" action="">
-    <label>Title</label>
-    <input type="text" name="title">
-    <label>Description</label>
-    <input type="text" name="description">
-    <button name="button" value="insert">Insert</button>
-    <hr>
-</form>
-<form method="post" action="">
-    <label>ID</label>
-    <input type="text" name="id">
-    <label>Title</label>
-    <input type="text" name="title">
-    <label>Description</label>
-    <input type="text" name="description">
-    <button name="button" value="update">Update</button>
-    <hr>
-</form>
-<form method="post" action="">
-    <label>ID</label>
-    <input type="text" name="id">
-    <button name="button" value="delete">Delete</button>
-</form>
-</html>
-
 <?php
 
+namespace App\Controllers;
+
 use App\QueryBuilder;
-$posts = new QueryBuilder;
+use League\Plates\Engine;
 
-if ($_POST) {
-    switch($_POST['button']) {
-        case 'getall':
-            var_dump($posts->getAll('posts'));
-            break;
+class Home {
+    private $posts, $templates;
 
-        case 'getone':
-            var_dump($posts->getOne('posts', $_POST['id']));
-            break;
-
-        case 'insert':
-            $posts->insert('posts', [
-                'title' => $_POST['title'],
-                'description' => $_POST['description']
-            ]);
-            break;
-
-        case 'update':
-            //var_dump($_POST['id']); die;
-            $posts->update('posts', $_POST['id'], [
-                'title' => $_POST['title'],
-                'description' => $_POST['description']
-            ]);
-            break;
-
-        case 'delete':
-            $posts->delete('posts', $_POST['id']);
-            break;
+    public function __construct() {
+        $this->posts = new QueryBuilder;
+        $this->templates = new Engine('../app/views');
     }
+
+    public function getAll($table, $template, $title, $status) {
+        echo $this->templates->render($template, [
+            'title' => $title,
+            'status' => $status
+            ]);
+            
+       foreach (($this->posts->getAll($table)) as $array) {
+            foreach ($array as $key=>$value) {
+                echo $key.' = '.$value.'; ';
+            }
+            echo '<br>';
+        };    
+    }
+
+    public function getOne($table, $id, $template, $title, $status) {
+        echo $this->templates->render($template, [
+            'title' => $title,
+            'status' => $status
+            ]);
+        if (!$this->posts->getOne($table, $id)) {
+            echo 'ID isn`t exist';
+            exit;
+        }
+        foreach (($this->posts->getOne($table, $id)) as $key=>$value) {
+            echo $key.' = '.$value.'; ';
+        }
+    }
+
+    public function insert($table, $data, $template, $title, $status) {
+        echo $this->templates->render($template, [
+            'title' => $title,
+            'status' => $status
+            ]);      
+        $this->posts->insert($table, $data);
+    }
+
+    public function update($table, $id, $data, $template, $title, $status) {
+        echo $this->templates->render($template, [
+            'title' => $title,
+            'status' => $status
+            ]);      
+        $this->posts->update($table, $id, $data);
+    }
+
+    public function delete($table, $id, $template, $title, $status) {
+        echo $this->templates->render($template, [
+            'title' => $title,
+            'status' => $status
+            ]);    
+        $this->posts->delete($table, $id);
+    }
+
+    public function inputData($data) {
+        
+    }
+    
 }
 ?>
